@@ -1,0 +1,486 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>Презентация: кадровые документы — два канала доставки</title>
+<style>
+  :root {
+    --bg: #F7F9FB; --surface: #FFFFFF; --ink: #1B2430; --muted: #5A6B80; --line: #D9E1EA;
+    --paper: #1D5FBF; --paper-ink: #16498F; --paper-soft: #EAF1FB;
+    --digital: #0E8A7B; --digital-ink: #0A6B60; --digital-soft: #E7F4F1;
+    --warn: #B45309; --warn-soft: #FBF0E1;
+    --good: #15803D; --good-soft: #E9F6EC;
+    --font-display: Georgia, 'Times New Roman', serif;
+    --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141A22; --surface: #1C242F; --ink: #E8EDF4; --muted: #93A3B8; --line: #33404F;
+      --paper: #7CA9EE; --paper-ink: #A7C6F5; --paper-soft: #21304A;
+      --digital: #45BFAE; --digital-ink: #7DD6C9; --digital-soft: #1B3634;
+      --warn: #E3A04A; --warn-soft: #3A2C18;
+      --good: #4ADE80; --good-soft: #16321F;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #141A22; --surface: #1C242F; --ink: #E8EDF4; --muted: #93A3B8; --line: #33404F;
+    --paper: #7CA9EE; --paper-ink: #A7C6F5; --paper-soft: #21304A;
+    --digital: #45BFAE; --digital-ink: #7DD6C9; --digital-soft: #1B3634;
+    --warn: #E3A04A; --warn-soft: #3A2C18;
+    --good: #4ADE80; --good-soft: #16321F;
+  }
+  :root[data-theme="light"] {
+    --bg: #F7F9FB; --surface: #FFFFFF; --ink: #1B2430; --muted: #5A6B80; --line: #D9E1EA;
+    --paper: #1D5FBF; --paper-ink: #16498F; --paper-soft: #EAF1FB;
+    --digital: #0E8A7B; --digital-ink: #0A6B60; --digital-soft: #E7F4F1;
+    --warn: #B45309; --warn-soft: #FBF0E1;
+    --good: #15803D; --good-soft: #E9F6EC;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-body); margin: 0; font-size: 15px; }
+
+  /* Top bar */
+  .topbar { position: sticky; top: 0; z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
+  .topbar-in { max-width: 1000px; margin: 0 auto; padding: 10px 18px; display: flex; align-items: center; gap: 12px; }
+  .topbar .t { font-size: 13px; font-weight: 700; letter-spacing: .03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar .counter { margin-left: auto; font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .progress { height: 3px; background: var(--line); }
+  .progress .fill { height: 100%; width: 0%; background: var(--digital); transition: width .2s; }
+
+  .deck { max-width: 1000px; margin: 0 auto; padding: 0 18px 90px; }
+
+  .slide { padding: 34px 0 26px; border-bottom: 1px solid var(--line); scroll-margin-top: 64px; }
+  .slide:last-child { border-bottom: none; }
+  .slide-no { font-size: 11.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .slide h2 { font-family: var(--font-display); font-size: clamp(21px, 3.2vw, 30px); line-height: 1.2; margin: 0 0 8px; text-wrap: balance; }
+  .slide .sub { font-size: 14.5px; color: var(--muted); line-height: 1.55; margin: 0 0 18px; max-width: 68ch; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+
+  /* Title slide */
+  .hero { text-align: left; padding: 46px 0 30px; }
+  .hero .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .hero h1 { font-family: var(--font-display); font-size: clamp(27px, 5vw, 42px); line-height: 1.13; margin: 10px 0 12px; text-wrap: balance; }
+  .hero .lead { font-size: 15.5px; color: var(--muted); line-height: 1.6; max-width: 64ch; margin: 0 0 18px; }
+  .badges { display: flex; flex-wrap: wrap; gap: 8px; }
+  .badge { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: var(--good-soft); color: var(--good); }
+  .badge.neutral { background: var(--surface); color: var(--muted); border: 1px solid var(--line); }
+
+  /* Two channel summary */
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .duo .ch { border-radius: 10px; padding: 18px; border: 1px solid var(--line); background: var(--surface); border-top: 4px solid; }
+  .ch--digital { border-top-color: var(--digital); }
+  .ch--paper { border-top-color: var(--paper); }
+  .ch .tag { font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+  .ch--digital .tag { color: var(--digital-ink); }
+  .ch--paper .tag { color: var(--paper-ink); }
+  .ch h3 { font-family: var(--font-display); font-size: 18px; margin: 6px 0 6px; line-height: 1.3; }
+  .ch p { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin: 0; }
+  .axiom { margin-top: 14px; border-radius: 8px; padding: 12px 16px; background: var(--warn-soft); color: var(--warn); font-size: 13.5px; font-weight: 600; line-height: 1.5; }
+
+  /* Router */
+  .qrow { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .qcard { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  .qcard .q { font-weight: 700; font-size: 15px; line-height: 1.4; margin: 0 0 8px; }
+  .qcard .ex { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0 0 12px; }
+  .ans { display: flex; align-items: baseline; gap: 9px; font-size: 13.5px; line-height: 1.45; padding: 7px 0; border-top: 1px dashed var(--line); }
+  .ans b { flex: none; font-size: 11px; letter-spacing: .06em; padding: 2px 9px; border-radius: 4px; }
+  .ans.to-paper b { background: var(--paper-soft); color: var(--paper-ink); }
+  .ans.to-digital b { background: var(--digital-soft); color: var(--digital-ink); }
+  .ans.to-next b { background: var(--bg); color: var(--muted); }
+
+  /* Lane details */
+  .lane { border-top: 4px solid; overflow: hidden; }
+  .lane--digital { border-top-color: var(--digital); }
+  .lane--paper { border-top-color: var(--paper); }
+  .block { padding: 16px 20px; }
+  .block + .block { border-top: 1px dashed var(--line); }
+  .block h3 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .cols2 > .block + .block { border-top: none; border-left: 1px dashed var(--line); }
+
+  .doclist { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0; list-style: none; }
+  .doclist li { font-size: 13px; line-height: 1.4; padding: 6px 11px; border-radius: 6px; }
+  .lane--digital .doclist li { background: var(--digital-soft); }
+  .lane--paper .doclist li { background: var(--paper-soft); }
+  .doclist li.law { font-weight: 600; }
+
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+  ol.steps li { counter-increment: step; position: relative; padding: 0 0 13px 38px; font-size: 13.5px; line-height: 1.5; }
+  ol.steps li:last-child { padding-bottom: 0; }
+  ol.steps li::before { content: counter(step); position: absolute; left: 0; top: 0; width: 25px; height: 25px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12.5px; font-weight: 700; background: var(--surface); border: 2px solid var(--line); z-index: 1; }
+  ol.steps li::after { content: ''; position: absolute; left: 11.5px; top: 27px; bottom: 2px; width: 2px; background: var(--line); }
+  ol.steps li:last-child::after { display: none; }
+  .lane--digital ol.steps li::before { border-color: var(--digital); color: var(--digital-ink); }
+  .lane--paper ol.steps li::before { border-color: var(--paper); color: var(--paper-ink); }
+  ol.steps .note { display: block; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  .flag, .okk { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .04em; padding: 1px 7px; border-radius: 4px; margin-left: 4px; white-space: nowrap; vertical-align: 1px; }
+  .flag { background: var(--warn-soft); color: var(--warn); }
+  .lane--paper .okk { background: var(--paper-soft); color: var(--paper-ink); }
+  .lane--digital .okk { background: var(--digital-soft); color: var(--digital-ink); }
+
+  .fallback { border-radius: 8px; padding: 12px 15px; font-size: 13px; line-height: 1.5; }
+  .lane--paper .fallback { background: var(--paper-soft); }
+  .lane--digital .fallback { background: var(--digital-soft); }
+  .fallback b { display: block; margin-bottom: 3px; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+  .lane--paper .fallback b { color: var(--paper-ink); }
+  .lane--digital .fallback b { color: var(--digital-ink); }
+
+  /* Warning slide */
+  .warncard { border-left: 4px solid var(--warn); padding: 18px 20px; }
+  .warncard p { font-size: 14px; line-height: 1.6; margin: 0 0 10px; max-width: 85ch; }
+  .warncard p:last-child { margin-bottom: 0; }
+
+  /* Consent slide */
+  .trio { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .doc { padding: 14px 16px; }
+  .doc .n { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .doc h4 { font-size: 14.5px; margin: 5px 0 5px; line-height: 1.35; }
+  .doc p { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin: 0; }
+  .rules { padding: 4px 20px; }
+  .rule { display: flex; gap: 12px; padding: 11px 0; border-top: 1px dashed var(--line); font-size: 13.5px; line-height: 1.5; }
+  .rule:first-child { border-top: none; }
+  .rule .ic { flex: none; width: 22px; text-align: center; font-weight: 800; }
+  .rule .ic.no { color: var(--warn); }
+  .rule .ic.yes { color: var(--good); }
+
+  /* Findings rows */
+  .findings { overflow: hidden; }
+  .frow { display: grid; grid-template-columns: 240px 1fr; gap: 14px; padding: 13px 20px; border-top: 1px solid var(--line); font-size: 13.5px; line-height: 1.5; }
+  .frow:first-child { border-top: none; }
+  .frow .k { font-weight: 700; }
+  .frow .v b { font-weight: 700; }
+  .frow .v { color: var(--ink); }
+  .frow .v .vnote { color: var(--muted); }
+
+  /* Criteria */
+  .crit { overflow: hidden; }
+  .crow { display: flex; gap: 13px; padding: 13px 20px; border-top: 1px solid var(--line); align-items: baseline; }
+  .crow:first-child { border-top: none; }
+  .crow .chk { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--good-soft); color: var(--good); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; align-self: flex-start; }
+  .crow .txt { font-size: 13.5px; line-height: 1.5; }
+  .crow .txt b { display: block; font-size: 14px; }
+
+  /* Approvals & significance */
+  .approw { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .appcard { padding: 13px 15px; }
+  .appcard .who { font-weight: 700; font-size: 14px; margin: 0 0 4px; }
+  .appcard p { font-size: 12.5px; color: var(--muted); line-height: 1.5; margin: 0; }
+  .siglist { margin: 0; padding: 0 0 0 0; list-style: none; }
+  .siglist li { position: relative; padding: 6px 0 6px 26px; font-size: 14px; line-height: 1.55; }
+  .siglist li::before { content: '◆'; position: absolute; left: 2px; top: 7px; font-size: 11px; color: var(--digital); }
+  .final { margin-top: 18px; border-radius: 10px; padding: 18px 20px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--good); font-size: 14.5px; line-height: 1.6; }
+
+  footer { font-size: 12px; color: var(--muted); line-height: 1.6; padding: 22px 0 0; }
+
+  /* Nav buttons */
+  .navbtns { position: fixed; right: 16px; bottom: 16px; display: flex; gap: 8px; z-index: 30; }
+  .navbtns button { width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); color: var(--ink); font-size: 19px; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,.12); }
+  .navbtns button:hover { border-color: var(--digital); color: var(--digital-ink); }
+  .navbtns button:focus-visible { outline: 2px solid var(--digital); outline-offset: 2px; }
+
+  @media (max-width: 760px) {
+    body { font-size: 15.5px; }
+    .duo, .qrow, .trio, .approw { grid-template-columns: 1fr; }
+    .cols2 { grid-template-columns: 1fr; }
+    .cols2 > .block + .block { border-left: none; border-top: 1px dashed var(--line); }
+    .frow { grid-template-columns: 1fr; gap: 3px; }
+    .slide { padding: 26px 0 22px; }
+    .doclist li, ol.steps li, .rule, .frow, .crow .txt { font-size: 14px; }
+    .navbtns { right: 12px; bottom: 12px; }
+  }
+  @media print {
+    :root { --bg: #FFFFFF; --surface: #FFFFFF; --ink: #1B2430; --muted: #5A6B80; --line: #C9D2DC;
+      --paper: #1D5FBF; --paper-ink: #16498F; --paper-soft: #EAF1FB;
+      --digital: #0E8A7B; --digital-ink: #0A6B60; --digital-soft: #E7F4F1;
+      --warn: #B45309; --warn-soft: #FBF0E1; --good: #15803D; --good-soft: #E9F6EC; }
+    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar, .navbtns { display: none; }
+    .deck { padding-bottom: 0; }
+    .slide { break-inside: avoid-page; page-break-inside: avoid; border-bottom: none; padding: 22px 0 10px; }
+    .card, .qcard, .ch { break-inside: avoid; }
+  }
+</style>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <span class="t">Кадровые документы: два канала доставки</span>
+    <span class="counter"><span id="cur">1</span> / <span id="total">10</span></span>
+  </div>
+  <div class="progress"><div class="fill" id="fill"></div></div>
+</div>
+
+<div class="deck" id="deck">
+
+  <section class="slide hero" id="s1">
+    <div class="eyebrow">Доклад о достижении цели · Аналитическое заключение</div>
+    <h1>Кадровые документы работникам: электронный формат и электронные уведомления о вручении</h1>
+    <p class="lead">Как отправлять документы работникам двумя каналами — через электронный кадровый документооборот и Почтой России с юридически значимым электронным уведомлением о вручении, — чтобы по каждому документу оставалось доказательство вручения, пригодное для суда.</p>
+    <div class="badges">
+      <span class="badge">✓ Анализ проведён</span>
+      <span class="badge">✓ Перечни определены</span>
+      <span class="badge">✓ Согласовано с ЮС и КДП</span>
+      <span class="badge">✓ Согласовано с ВС в срок</span>
+      <span class="badge neutral">Основание: ст. 22.1–22.3 ТК РФ</span>
+    </div>
+  </section>
+
+  <section class="slide" id="s2">
+    <div class="slide-no">02 · Суть решения</div>
+    <h2>Два канала — параллельно и постоянно</h2>
+    <p class="sub">Каналы не заменяют друг друга. Электронный — для тех, кто в контуре КЭДО. Бумажный — для документов из запретного перечня закона и для всех работников без согласия.</p>
+    <div class="duo">
+      <div class="ch ch--digital">
+        <span class="tag">Канал А · Электронный</span>
+        <h3>КЭДО — документ в системе, без бумаги</h3>
+        <p>Доказательство: система фиксирует дату и время ознакомления или подписания работником.</p>
+      </div>
+      <div class="ch ch--paper">
+        <span class="tag">Канал Б · Бумажный</span>
+        <h3>Почта России + электронное уведомление о вручении</h3>
+        <p>Документ бумажный, электронное — только подтверждение: приходит в день вручения, подписано ЭП Почты, проверяется через Госуслуги.</p>
+      </div>
+    </div>
+    <div class="axiom">Бумажный канал не сворачивается никогда: работник вправе не давать согласие на КЭДО или отозвать его — без последствий для себя.</div>
+  </section>
+
+  <section class="slide" id="s3">
+    <div class="slide-no">03 · Маршрутизация</div>
+    <h2>Как определить канал: два вопроса</h2>
+    <p class="sub">Проверяются строго по порядку — и канал для любого документа определяется однозначно.</p>
+    <div class="qrow">
+      <div class="qcard">
+        <p class="q">Вопрос 1. Документ в запретном перечне ч. 3 ст. 22.1 ТК РФ?</p>
+        <p class="ex">Приказ об увольнении · трудовая книжка и СТД · акт о несчастном случае · инструктажи по охране труда</p>
+        <div class="ans to-paper"><b>ДА</b><span>только бумажный канал, без вариантов</span></div>
+        <div class="ans to-next"><b>НЕТ</b><span>переходите к вопросу 2</span></div>
+      </div>
+      <div class="qcard">
+        <p class="q">Вопрос 2. Работник в контуре КЭДО?</p>
+        <p class="ex">Дал письменное согласие и не отозвал — либо принят после 31.12.2021 без трудового стажа на эту дату (согласие не требуется)</p>
+        <div class="ans to-digital"><b>ДА</b><span>электронный канал</span></div>
+        <div class="ans to-paper"><b>НЕТ</b><span>бумажный канал</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="s4">
+    <div class="slide-no">04 · Канал А</div>
+    <h2>КЭДО: что отправляем и как</h2>
+    <div class="card lane lane--digital">
+      <div class="block">
+        <h3>Что отправляем</h3>
+        <ul class="doclist">
+          <li>Доп. соглашения к трудовому договору</li>
+          <li>Договоры о матответственности</li>
+          <li>Ученические договоры</li>
+          <li>Приказы о дисциплинарных взысканиях</li>
+          <li>Уведомления об изменении условий ТД</li>
+          <li>ЛНА для ознакомления</li>
+          <li>Графики, расчётные листки, заявления</li>
+        </ul>
+      </div>
+      <div class="cols2">
+        <div class="block">
+          <h3>Подготовка — один раз</h3>
+          <ol class="steps">
+            <li><b>Утвердить Положение об ЭДО</b><span class="note">Перечень документов, виды подписей, доступ. Согласуют ЮС и КДП.</span></li>
+            <li><b>Выбрать систему</b><span class="note">Своя ИС или «Работа в России»; заложить журналирование ознакомления.</span></li>
+            <li><b>Получить УКЭП работодателя</b><span class="note">Обязательна для договоров, взысканий, уведомлений (ст. 22.3 ТК РФ).</span></li>
+            <li><b>Уведомить работников, собрать согласия</b><span class="note">Бланк с двумя вариантами выбора; реестр согласий и отзывов.</span></li>
+            <li><b>Согласовать пакет с ВС</b></li>
+          </ol>
+        </div>
+        <div class="block">
+          <h3>Каждая отправка</h3>
+          <ol class="steps">
+            <li><b>Проверить реестр согласий</b> — действует, не отозвано? <span class="flag">критично</span></li>
+            <li>Сформировать документ, <b>подписать нужным видом подписи</b></li>
+            <li>Разместить в личном кабинете работника</li>
+            <li>Система фиксирует <b>дату и время ознакомления</b> <span class="okk">доказательство</span></li>
+            <li>По заявлению — <b>бумажная копия за 3 рабочих дня</b></li>
+          </ol>
+        </div>
+      </div>
+      <div class="block">
+        <div class="fallback"><b>Если согласия нет или отозвано</b>Документ уходит в канал Б — на бумаге с электронным уведомлением о вручении.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="s5">
+    <div class="slide-no">05 · Канал Б</div>
+    <h2>Почта России + ЮЗЭУВ: что отправляем и как</h2>
+    <div class="card lane lane--paper">
+      <div class="block">
+        <h3>Что отправляем</h3>
+        <ul class="doclist">
+          <li class="law">Приказ об увольнении</li>
+          <li class="law">Трудовая книжка / СТД</li>
+          <li class="law">Акт о несчастном случае</li>
+          <li class="law">Инструктажи по охране труда</li>
+          <li>Всё для работников без согласия на КЭДО</li>
+        </ul>
+      </div>
+      <div class="cols2">
+        <div class="block">
+          <h3>Подготовка — один раз</h3>
+          <ol class="steps">
+            <li><b>Проверить договор с Почтой</b> и тарифы <span class="okk">перезаключать не нужно</span><span class="note">ЮЗЭУВ — допуслуга к действующему договору.</span></li>
+            <li>Нет услуги в перечне — <b>допсоглашение или заявка</b></li>
+            <li><b>Настроить кабинет «Отправка для бизнеса»</b>, привязать телефон</li>
+            <li><b>Настроить выгрузку уведомлений</b> в своё хранилище <span class="flag">у Почты — только 5 лет</span></li>
+            <li><b>Подтвердить с ЮС</b> силу ЮЗЭУВ и обязательность описи</li>
+          </ol>
+        </div>
+        <div class="block">
+          <h3>Каждая отправка</h3>
+          <ol class="steps">
+            <li><b>Сверить адрес работника</b> с реестром</li>
+            <li>Составить <b>опись вложения</b> <span class="flag">обязательно</span><span class="note">Без описи не доказать, какой документ направлен.</span></li>
+            <li>Заказное письмо, <b>отметка ЮЗЭУВ в списке ф. 103</b></li>
+            <li>В день вручения — <b>уведомление в кабинете</b>: ФИО, дата, подпись Почты <span class="okk">доказательство</span></li>
+            <li><b>Выгрузить бланк</b> в личное дело</li>
+          </ol>
+        </div>
+      </div>
+      <div class="block">
+        <div class="fallback"><b>Если письмо не вручено</b>Возврат или истёк срок хранения: конверт сохранить нераспечатанным + отчёт об отслеживании. Момент уведомления — по позиции ЮС.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" id="s6">
+    <div class="slide-no">06 · Зона внимания</div>
+    <h2>ЭЗП — третий, отдельный продукт. Не путать</h2>
+    <div class="card warncard">
+      <p>Электронные заказные письма (ЭЗП) — сервис, при котором Почта доставляет письмо в электронный ящик получателя на Госуслугах, а неподключённым — распечатывает на бумаге. Требует <b>отдельного договора</b>; работник подключается сам, работодатель каналом не управляет и заранее не знает, в какой форме дойдёт письмо.</p>
+      <p><b>Для документов запретного перечня ЭЗП не используем до позиции ЮС:</b> закон требует бумажной формы, а форма доставки в ЭЗП от отправителя не зависит. Согласие на ЭЗП у работника не запрашивается — оно даётся только на Госуслугах; бумага работодателя здесь силы не имеет.</p>
+    </div>
+  </section>
+
+  <section class="slide" id="s7">
+    <div class="slide-no">07 · Согласие работника</div>
+    <h2>Согласие на КЭДО: три бланка и четыре правила</h2>
+    <div class="trio">
+      <div class="card doc">
+        <span class="n">Документ 1</span>
+        <h4>Уведомление о переходе на ЭДО</h4>
+        <p>Обязательный первый шаг по ст. 22.2 ТК РФ. Вручается каждому работнику под подпись.</p>
+      </div>
+      <div class="card doc">
+        <span class="n">Документ 2</span>
+        <h4>Согласие — основной бланк</h4>
+        <p>Два варианта выбора, разъяснение прав, адрес для корреспонденции и обязанность сообщать о его изменении.</p>
+      </div>
+      <div class="card doc">
+        <span class="n">Документ 3</span>
+        <h4>Краткая форма при трудоустройстве</h4>
+        <p>Полстраницы — в пакет документов при приёме на работу.</p>
+      </div>
+    </div>
+    <div class="card rules">
+      <div class="rule"><span class="ic yes">✓</span><span>Запрашивать при трудоустройстве можно — ст. 22.2 ТК РФ это прямо предусматривает.</span></div>
+      <div class="rule"><span class="ic no">✗</span><span>Нельзя обусловливать приём на работу согласием и нельзя включать согласие условием в трудовой договор — при споре рассыпается всё, что отправлено электронно.</span></div>
+      <div class="rule"><span class="ic no">✗</span><span>Бланк только со строкой «даю согласие» — риск признания навязанным. Всегда два варианта выбора.</span></div>
+      <div class="rule"><span class="ic yes">✓</span><span>Согласие не требуется от принятых после 31.12.2021 без трудового стажа на эту дату — зафиксировать основание по СТД.</span></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s8">
+    <div class="slide-no">08 · Ключевые выводы</div>
+    <h2>Шесть выводов анализа</h2>
+    <div class="card findings">
+      <div class="frow"><span class="k">Договор с Почтой России</span><span class="v"><b>Перезаключать не нужно.</b> ЮЗЭУВ — допуслуга к действующему договору (опция в ф. 103). <span class="vnote">Проверить тарифное приложение; при отсутствии услуги — допсоглашение.</span></span></div>
+      <div class="frow"><span class="k">ЭЗП</span><span class="v">Отдельный сервис и отдельный договор. Для запретного перечня — не применять до позиции ЮС.</span></div>
+      <div class="frow"><span class="k">Опись вложения</span><span class="v"><b>Обязательна.</b> Без неё не доказать, какой именно документ направлен работнику.</span></div>
+      <div class="frow"><span class="k">Хранение подтверждений</span><span class="v">У оператора — 5 лет, кадровые сроки больше. <b>Автоматическая выгрузка</b> во внутреннее хранилище обязательна.</span></div>
+      <div class="frow"><span class="k">Адрес работника</span><span class="v">Обязанность сообщать об изменении адреса — в трудовой договор или ЛНА, иначе риск недоставки на работодателе.</span></div>
+      <div class="frow"><span class="k">Экономика</span><span class="v">Электронное уведомление дешевле бумажного и приходит в день вручения вместо недель возврата бланка ф. 119. <span class="vnote">Тарифы подтверждаются по договору.</span></span></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s9">
+    <div class="slide-no">09 · Критерии цели</div>
+    <h2>Все четыре критерия выполнены</h2>
+    <div class="card crit">
+      <div class="crow"><span class="chk">✓</span><span class="txt"><b>1. Анализ проведён</b>Организационный, юридический и технический контуры; оценены риски: отзыв согласия, недоставка, спор о дате уведомления.</span></div>
+      <div class="crow"><span class="chk">✓</span><span class="txt"><b>2. Перечни определены</b>Два перечня — по каналам; по каждой позиции основание, вид подписи, срок, способ подтверждения вручения.</span></div>
+      <div class="crow"><span class="chk">✓</span><span class="txt"><b>3. Согласовано с ЮС и КДП</b>Заключение и возможность отправки; замечания отработаны, перечни утверждены в согласованной редакции.</span></div>
+      <div class="crow"><span class="chk">✓</span><span class="txt"><b>4. Согласовано с ВС в срок</b>Итоговый результат представлен и согласован до завершения отчётного периода по закрытию целей.</span></div>
+    </div>
+  </section>
+
+  <section class="slide" id="s10">
+    <div class="slide-no">10 · Значимость и вывод</div>
+    <h2>Что это даёт компании</h2>
+    <div class="approw">
+      <div class="card appcard"><p class="who">ЮС</p><p>Заключение, перечни, бланк согласия, сила ЮЗЭУВ, опись, момент уведомления, ЭЗП</p></div>
+      <div class="card appcard"><p class="who">КДП</p><p>Исполнимость: маршруты, реестры согласий и адресов, выгрузка и хранение подтверждений</p></div>
+      <div class="card appcard"><p class="who">ВС</p><p>Итоговое согласование до завершения отчётного периода</p></div>
+    </div>
+    <ul class="siglist">
+      <li><b>Снят ключевой правовой риск:</b> по каждому документу — судебное доказательство факта и даты вручения. Это самое частое слабое место работодателя в трудовых спорах и при проверках.</li>
+      <li><b>Единый порядок</b> для всех подразделений вместо разрозненной практики.</li>
+      <li><b>Быстрее и дешевле:</b> подтверждение в день вручения вместо недель ожидания бумажного бланка; меньше ручной работы КДП.</li>
+      <li><b>Результат тиражируем:</b> основа внутреннего регламента и масштабирования электронного кадрового документооборота.</li>
+    </ul>
+    <div class="final"><b>Вывод:</b> цель выполнена по всем четырём критериям. Процесс реализуем в рамках действующего законодательства и действующего договора с Почтой России, согласован со всеми сторонами и готов к переводу в регламентную практику.</div>
+    <footer>Основания: ст. 22.1–22.3 ТК РФ · открытые материалы АО «Почта России» о ЮЗЭУВ и ЭЗП (тарифы и условия подтверждаются по договору) · судебная практика об описи вложения и надлежащем уведомлении. Материал подготовлен к докладу о достижении цели; не заменяет позицию ЮС.</footer>
+  </section>
+
+</div>
+
+<div class="navbtns" aria-label="Навигация по слайдам">
+  <button id="prev" title="Предыдущий слайд" aria-label="Предыдущий слайд">↑</button>
+  <button id="next" title="Следующий слайд" aria-label="Следующий слайд">↓</button>
+</div>
+
+<script>
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var cur = document.getElementById('cur');
+    var total = document.getElementById('total');
+    var fill = document.getElementById('fill');
+    total.textContent = slides.length;
+    var active = 0;
+
+    function setActive(i) {
+      active = Math.max(0, Math.min(slides.length - 1, i));
+      cur.textContent = active + 1;
+      fill.style.width = ((active + 1) / slides.length * 100) + '%';
+    }
+
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) setActive(slides.indexOf(e.target));
+        });
+      }, { rootMargin: '-40% 0px -55% 0px' });
+      slides.forEach(function (s) { io.observe(s); });
+    }
+
+    function go(delta) {
+      var target = Math.max(0, Math.min(slides.length - 1, active + delta));
+      slides[target].scrollIntoView({ block: 'start' });
+      setActive(target);
+    }
+    document.getElementById('prev').addEventListener('click', function () { go(-1); });
+    document.getElementById('next').addEventListener('click', function () { go(1); });
+    document.addEventListener('keydown', function (e) {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); go(1); }
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
+    });
+    setActive(0);
+  })();
+</script>
+
+</body>
+</html>
