@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="QR-инструмент для КДП: код отслеживания почтового отправления, проверка уведомления, ссылка на материалы. Всё формируется в браузере, данные никуда не отправляются.">
+<title>QR-инструмент · Кадровые документы</title>
+<script src="vendor/qrcode.js"></script>
+<style>
+  :root {
+    --bg: #F7F9FB; --surface: #FFFFFF; --ink: #1B2430; --muted: #5A6B80; --line: #D9E1EA;
+    --paper: #1D5FBF; --paper-ink: #16498F; --paper-soft: #EAF1FB;
+    --digital: #0E8A7B; --digital-ink: #0A6B60; --digital-soft: #E7F4F1;
+    --warn: #B45309; --warn-soft: #FBF0E1;
+    --btn-ink: #FFFFFF;
+    --font-display: Georgia, 'Times New Roman', serif;
+    --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141A22; --surface: #1C242F; --ink: #E8EDF4; --muted: #93A3B8; --line: #33404F;
+      --paper: #7CA9EE; --paper-ink: #A7C6F5; --paper-soft: #21304A;
+      --digital: #45BFAE; --digital-ink: #7DD6C9; --digital-soft: #1B3634;
+      --warn: #E3A04A; --warn-soft: #3A2C18;
+      --btn-ink: #10151C;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-body); margin: 0; font-size: 15px; line-height: 1.55; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 30px 18px 70px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-family: var(--font-display); font-size: clamp(23px, 4vw, 32px); line-height: 1.18; margin: 8px 0 10px; }
+  .lead { font-size: 14.5px; color: var(--muted); margin: 0 0 8px; max-width: 62ch; }
+  .privacy { display: inline-block; font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; background: var(--digital-soft); color: var(--digital-ink); margin-bottom: 18px; }
+  a.back { display: inline-block; font-size: 13px; color: var(--paper-ink); text-decoration: none; margin-bottom: 14px; }
+  a.back:hover { text-decoration: underline; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .tabs button { font-family: var(--font-body); font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; }
+  .tabs button[aria-pressed="true"] { background: var(--paper-soft); border-color: var(--paper); color: var(--paper-ink); }
+  .tabs button:focus-visible { outline: 2px solid var(--digital); outline-offset: 2px; }
+
+  label { display: block; font-size: 13px; font-weight: 600; margin: 12px 0 5px; }
+  label .opt { font-weight: 400; color: var(--muted); }
+  input[type="text"] { width: 100%; font-family: var(--font-body); font-size: 15px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+  input[type="text"]:focus-visible { outline: 2px solid var(--digital); outline-offset: 1px; }
+  .hint { font-size: 12.5px; color: var(--muted); margin-top: 5px; }
+  .err { font-size: 13px; color: var(--warn); font-weight: 600; margin-top: 8px; display: none; }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .actions button { font-family: var(--font-body); font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: 8px; border: none; background: var(--paper); color: var(--btn-ink); cursor: pointer; }
+  .actions button.secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); font-weight: 600; }
+  .actions button:focus-visible { outline: 2px solid var(--digital); outline-offset: 2px; }
+
+  .result { display: none; text-align: center; }
+  .qrbox { display: inline-block; background: #FFFFFF; border: 1px solid var(--line); border-radius: 12px; padding: 18px; margin: 6px auto 10px; }
+  .qrbox svg { display: block; width: 240px; height: 240px; }
+  .caption { font-size: 14px; font-weight: 700; margin: 4px 0 2px; word-break: break-word; }
+  .sub { font-size: 12.5px; color: var(--muted); word-break: break-all; max-width: 46ch; margin: 0 auto; }
+
+  .uses { margin: 0; padding: 0; list-style: none; }
+  .uses li { display: flex; gap: 11px; padding: 9px 0; border-top: 1px dashed var(--line); font-size: 13.5px; }
+  .uses li:first-child { border-top: none; }
+  .uses .n { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--paper-soft); color: var(--paper-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+  .axiom { border-radius: 8px; padding: 11px 15px; background: var(--warn-soft); color: var(--warn); font-size: 13.5px; font-weight: 600; margin-top: 14px; }
+
+  @media print {
+    body { background: #fff; }
+    .wrap { padding: 10px; }
+    a.back, .tabs, form .fields, .actions, .card.help, .lead, .privacy, .eyebrow { display: none !important; }
+    .card { border: none; padding: 0; }
+    .result { display: block !important; }
+    h1 { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← К проекту «Два канала доставки»</a>
+  <div class="eyebrow">Рабочий инструмент КДП</div>
+  <h1>QR-коды для отправлений и материалов</h1>
+  <p class="lead">Сформируйте QR-код, распечатайте и вклейте в личное дело рядом с копией описи — любой проверяющий сканирует телефоном и сразу видит судьбу отправления.</p>
+  <span class="privacy">🔒 Всё формируется в вашем браузере — данные никуда не отправляются</span>
+
+  <div class="card">
+    <div class="tabs" role="group" aria-label="Тип QR-кода">
+      <button type="button" id="tabTrack" aria-pressed="true">📮 Отслеживание отправления</button>
+      <button type="button" id="tabUrl" aria-pressed="false">🔗 Ссылка / текст</button>
+    </div>
+    <form id="f" class="fields" onsubmit="return false;">
+      <div id="fldTrack">
+        <label for="track">Трек-номер отправления</label>
+        <input type="text" id="track" inputmode="text" autocomplete="off" placeholder="14 цифр, например 45094285000123">
+        <p class="hint">Указан в чеке и в списке ф. 103. QR откроет страницу отслеживания на pochta.ru.</p>
+      </div>
+      <div id="fldUrl" style="display:none">
+        <label for="url">Ссылка или текст</label>
+        <input type="text" id="url" autocomplete="off" placeholder="https://…">
+        <p class="hint">Например, ссылка на этот сайт, на страницу проверки электронной подписи или на карточку во внутреннем реестре.</p>
+      </div>
+      <label for="cap">Подпись под кодом <span class="opt">— необязательно</span></label>
+      <input type="text" id="cap" autocomplete="off" placeholder="Например: Уведомление о сокращении, исх. № 12-к">
+      <p class="err" id="err"></p>
+      <div class="actions">
+        <button type="button" id="make">Сформировать QR</button>
+        <button type="button" id="print" class="secondary">🖨 Печать</button>
+      </div>
+    </form>
+    <div class="result" id="result">
+      <div class="qrbox" id="qrbox"></div>
+      <p class="caption" id="capOut"></p>
+      <p class="sub" id="subOut"></p>
+    </div>
+  </div>
+
+  <div class="card help">
+    <ul class="uses">
+      <li><span class="n">1</span><span><b>На копию описи в личном деле.</b> QR с трек-номером — статус и дата вручения открываются сканированием, без ручного набора номера.</span></li>
+      <li><span class="n">2</span><span><b>Проверка уведомления.</b> QR со ссылкой на сервис проверки электронной подписи — приложите к выгруженному бланку ЮЗЭУВ.</span></li>
+      <li><span class="n">3</span><span><b>На печатные материалы.</b> QR со ссылкой на этот сайт — бумажная схема всегда ведёт к актуальной версии и документам.</span></li>
+    </ul>
+    <div class="axiom">QR-код не заменяет опись вложения ф. 107 — она остаётся обязательной и оформляется на Почте. QR — это навигация к доказательствам, а не само доказательство.</div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var mode = 'track';
+    var tabTrack = document.getElementById('tabTrack');
+    var tabUrl = document.getElementById('tabUrl');
+    var fldTrack = document.getElementById('fldTrack');
+    var fldUrl = document.getElementById('fldUrl');
+    var err = document.getElementById('err');
+    var result = document.getElementById('result');
+    var qrbox = document.getElementById('qrbox');
+    var capOut = document.getElementById('capOut');
+    var subOut = document.getElementById('subOut');
+
+    function setMode(m) {
+      mode = m;
+      tabTrack.setAttribute('aria-pressed', m === 'track' ? 'true' : 'false');
+      tabUrl.setAttribute('aria-pressed', m === 'url' ? 'true' : 'false');
+      fldTrack.style.display = m === 'track' ? '' : 'none';
+      fldUrl.style.display = m === 'url' ? '' : 'none';
+      err.style.display = 'none';
+    }
+    tabTrack.addEventListener('click', function () { setMode('track'); });
+    tabUrl.addEventListener('click', function () { setMode('url'); });
+
+    function fail(msg) { err.textContent = msg; err.style.display = 'block'; result.style.display = 'none'; }
+
+    function build() {
+      err.style.display = 'none';
+      var data, subtitle;
+      if (mode === 'track') {
+        var t = document.getElementById('track').value.replace(/\s+/g, '').toUpperCase();
+        if (!t) { fail('Введите трек-номер.'); return; }
+        var ru = /^\d{14}$/.test(t);
+        var intl = /^[A-Z]{2}\d{9}[A-Z]{2}$/.test(t);
+        if (!ru && !intl) { fail('Трек-номер выглядит неверно: нужно 14 цифр (внутренний) или формат AA123456789BB (международный).'); return; }
+        data = 'https://www.pochta.ru/tracking?barcode=' + t;
+        subtitle = 'Отправление № ' + t + ' · отслеживание pochta.ru';
+      } else {
+        var u = document.getElementById('url').value.trim();
+        if (!u) { fail('Введите ссылку или текст.'); return; }
+        data = u;
+        subtitle = u;
+      }
+      try {
+        var qr = qrcode(0, 'M');
+        qr.addData(data);
+        qr.make();
+        qrbox.innerHTML = qr.createSvgTag({ cellSize: 6, margin: 0, scalable: true });
+      } catch (e) {
+        fail('Не удалось сформировать код: слишком длинный текст.'); return;
+      }
+      var cap = document.getElementById('cap').value.trim();
+      capOut.textContent = cap;
+      capOut.style.display = cap ? '' : 'none';
+      subOut.textContent = subtitle;
+      result.style.display = 'block';
+    }
+
+    document.getElementById('make').addEventListener('click', build);
+    document.getElementById('f').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); build(); }
+    });
+    document.getElementById('print').addEventListener('click', function () {
+      if (result.style.display !== 'block') { build(); }
+      if (result.style.display === 'block') { window.print(); }
+    });
+  })();
+</script>
+</body>
+</html>
