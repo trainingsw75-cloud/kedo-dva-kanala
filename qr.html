@@ -183,6 +183,15 @@
     }
 
     document.getElementById('make').addEventListener('click', build);
+    (function () {
+      var p = new URLSearchParams(location.search);
+      var t = p.get('track'), c = p.get('cap');
+      if (t) {
+        document.getElementById('track').value = t;
+        if (c) { document.getElementById('cap').value = c; }
+        build();
+      }
+    })();
     document.getElementById('f').addEventListener('keydown', function (e) {
       if (e.key === 'Enter') { e.preventDefault(); build(); }
     });

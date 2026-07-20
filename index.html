@@ -180,6 +180,7 @@
       <button id="closeAll" type="button">▾ Свернуть всё</button>
       <a class="btn" href="prezentaciya.html">🎞 Версия-презентация</a>
       <a class="btn" href="qr.html">📱 QR-инструмент</a>
+      <a class="btn" href="zhurnal.html">📒 Журнал отправлений</a>
     </div>
   </header>
 
@@ -322,6 +323,19 @@
       <div class="crow"><span class="chk">3</span><span class="txt"><b>На печатные материалы</b>QR со ссылкой на этот сайт — бумажная схема или регламент всегда ведут к актуальной версии и документам.</span></div>
       <div class="toolbar" style="margin:16px 0 4px"><a class="btn" href="qr.html">📱 Открыть QR-инструмент</a></div>
       <p class="t" style="color:var(--muted);font-size:12.5px">Коды формируются прямо в браузере — трек-номера и подписи никуда не отправляются.</p>
+    </div>
+  </details>
+
+  <details class="shelf" id="p10">
+    <summary><span class="ico i-docs">📒</span><span class="st"><b>Журнал отправлений</b><span>Учёт писем: кому, что, трек-номер, статус, QR и экспорт в Excel</span></span><span class="arr">▶</span></summary>
+    <div class="shelf-body">
+      <p class="t">Рабочий стол кадровика: после каждой отправки — одна запись в журнале. Из строки в один клик открываются отслеживание на pochta.ru и QR-код для личного дела; статус (отправлено / вручено / возврат) отмечается вручную, журнал выгружается в Excel.</p>
+      <h3 class="h">Как связаны журнал, QR и личный кабинет Почты</h3>
+      <div class="crow"><span class="chk">🔑</span><span class="txt"><b>Ключ связи — трек-номер</b>Журнал его хранит, QR кодирует ссылку с ним, в кабинете «Отправка для бизнеса» по нему находится бланк ЮЗЭУВ.</span></div>
+      <div class="crow"><span class="chk">🔓</span><span class="txt"><b>QR не привязан к кабинету — и не должен быть</b>Он ведёт на публичную страницу отслеживания, пароль не нужен, поэтому его безопасно клеить в личное дело.</span></div>
+      <div class="crow"><span class="chk">🛡</span><span class="txt"><b>Пароль от кабинета никому не передаётся</b>Для автоматизации ИТ-специалист выпускает API-токен — его можно отозвать, и он даёт только выданные права.</span></div>
+      <div class="toolbar" style="margin:16px 0 4px"><a class="btn" href="zhurnal.html">📒 Открыть журнал</a></div>
+      <p class="t" style="color:var(--muted);font-size:12.5px">Журнал хранится только в браузере на компьютере кадровика и никуда не отправляется. Официальный учёт ведётся в системах компании — журнал его дополняет, а не заменяет.</p>
     </div>
   </details>
 

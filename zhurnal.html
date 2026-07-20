@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Журнал отправлений КДП: учёт писем работникам, трек-номера, статусы, QR-коды, экспорт в CSV. Данные хранятся только в вашем браузере.">
+<title>Журнал отправлений · Кадровые документы</title>
+<style>
+  :root {
+    --bg: #F7F9FB; --surface: #FFFFFF; --ink: #1B2430; --muted: #5A6B80; --line: #D9E1EA;
+    --paper: #1D5FBF; --paper-ink: #16498F; --paper-soft: #EAF1FB;
+    --digital: #0E8A7B; --digital-ink: #0A6B60; --digital-soft: #E7F4F1;
+    --warn: #B45309; --warn-soft: #FBF0E1;
+    --good: #15803D; --good-soft: #E9F6EC;
+    --btn-ink: #FFFFFF;
+    --font-display: Georgia, 'Times New Roman', serif;
+    --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141A22; --surface: #1C242F; --ink: #E8EDF4; --muted: #93A3B8; --line: #33404F;
+      --paper: #7CA9EE; --paper-ink: #A7C6F5; --paper-soft: #21304A;
+      --digital: #45BFAE; --digital-ink: #7DD6C9; --digital-soft: #1B3634;
+      --warn: #E3A04A; --warn-soft: #3A2C18;
+      --good: #4ADE80; --good-soft: #16321F;
+      --btn-ink: #10151C;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-body); margin: 0; font-size: 15px; line-height: 1.55; }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 30px 18px 70px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-family: var(--font-display); font-size: clamp(23px, 4vw, 32px); line-height: 1.18; margin: 8px 0 10px; }
+  .lead { font-size: 14.5px; color: var(--muted); margin: 0 0 8px; max-width: 66ch; }
+  .privacy { display: inline-block; font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; background: var(--digital-soft); color: var(--digital-ink); margin-bottom: 18px; }
+  a.back { display: inline-block; font-size: 13px; color: var(--paper-ink); text-decoration: none; margin-bottom: 14px; }
+  a.back:hover { text-decoration: underline; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .card h2 { font-family: var(--font-display); font-size: 18px; margin: 0 0 12px; }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid .full { grid-column: 1 / -1; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 0 0 5px; }
+  label .opt { font-weight: 400; color: var(--muted); }
+  input[type="text"], input[type="date"], select { width: 100%; font-family: var(--font-body); font-size: 14.5px; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+  input:focus-visible, select:focus-visible { outline: 2px solid var(--digital); outline-offset: 1px; }
+  .err { font-size: 13px; color: var(--warn); font-weight: 600; margin-top: 8px; display: none; }
+
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  button { font-family: var(--font-body); font-size: 14px; font-weight: 700; padding: 10px 16px; border-radius: 8px; border: none; background: var(--paper); color: var(--btn-ink); cursor: pointer; }
+  button.secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); font-weight: 600; }
+  button.danger { background: var(--surface); color: var(--warn); border: 1px solid var(--line); font-weight: 600; }
+  button:focus-visible { outline: 2px solid var(--digital); outline-offset: 2px; }
+
+  .stats { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 8px 10px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+  tbody td { padding: 9px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:hover { background: color-mix(in srgb, var(--line) 18%, transparent); }
+  td .fio { font-weight: 700; }
+  td .doc { font-size: 12.5px; color: var(--muted); }
+  td a.track { color: var(--paper-ink); text-decoration: none; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td a.track:hover { text-decoration: underline; }
+  .rowbtns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .rowbtns a, .rowbtns button { font-size: 12px; font-weight: 600; padding: 4px 9px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); text-decoration: none; cursor: pointer; }
+  .rowbtns a:hover, .rowbtns button:hover { border-color: var(--digital); color: var(--digital-ink); }
+  select.status { width: auto; font-size: 12.5px; padding: 4px 7px; border-radius: 6px; }
+  .st-sent { color: var(--paper-ink); }
+  .st-done { color: var(--good); font-weight: 700; }
+  .st-back { color: var(--warn); font-weight: 700; }
+  .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 26px 10px; }
+  .tablewrap { overflow-x: auto; }
+
+  .how { margin: 0; padding: 0; list-style: none; }
+  .how li { display: flex; gap: 11px; padding: 8px 0; border-top: 1px dashed var(--line); font-size: 13.5px; }
+  .how li:first-child { border-top: none; }
+  .how .n { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--paper-soft); color: var(--paper-ink); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; }
+  .axiom { border-radius: 8px; padding: 11px 15px; background: var(--warn-soft); color: var(--warn); font-size: 13px; font-weight: 600; margin-top: 12px; }
+
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr; }
+    thead { display: none; }
+    tbody td { display: block; border-bottom: none; padding: 3px 12px; }
+    tbody tr { display: block; border: 1px solid var(--line); border-radius: 9px; margin-bottom: 10px; padding: 9px 0; background: var(--surface); }
+  }
+  @media print {
+    a.back, form, .actions, .rowbtns, .card.help, .privacy, .lead { display: none !important; }
+    body { background: #fff; }
+    .card { border: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← К проекту «Два канала доставки»</a>
+  <div class="eyebrow">Рабочий инструмент КДП</div>
+  <h1>Журнал отправлений</h1>
+  <p class="lead">Учёт писем работникам: кому, что и когда отправлено, трек-номер, статус. Из каждой строки — отслеживание в один клик и QR для личного дела. Ключ, который связывает журнал, QR и личный кабинет Почты, — трек-номер.</p>
+  <span class="privacy">🔒 Журнал хранится только в этом браузере на этом компьютере — никуда не отправляется</span>
+
+  <div class="card">
+    <h2>Новая запись</h2>
+    <form id="f" onsubmit="return false;">
+      <div class="grid">
+        <div><label for="dt">Дата отправки</label><input type="date" id="dt"></div>
+        <div><label for="track">Трек-номер</label><input type="text" id="track" autocomplete="off" placeholder="14 цифр из чека / списка ф. 103"></div>
+        <div><label for="fio">Работник</label><input type="text" id="fio" autocomplete="off" placeholder="Фамилия И. О."></div>
+        <div><label for="doc">Документ</label><input type="text" id="doc" autocomplete="off" placeholder="Например: уведомление о сокращении, исх. № 12-к"></div>
+        <div class="full"><label for="note">Примечание <span class="opt">— необязательно</span></label><input type="text" id="note" autocomplete="off" placeholder="Опись оформлена, ЮЗЭУВ подключено…"></div>
+      </div>
+      <p class="err" id="err"></p>
+      <div class="actions">
+        <button type="button" id="add">＋ Добавить в журнал</button>
+        <button type="button" id="csv" class="secondary">⬇ Экспорт CSV (Excel)</button>
+        <button type="button" id="printBtn" class="secondary">🖨 Печать журнала</button>
+        <button type="button" id="clear" class="danger">Очистить журнал…</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Записи</h2>
+    <p class="stats" id="stats"></p>
+    <div class="tablewrap">
+      <table id="tbl" style="display:none">
+        <thead><tr><th>Дата</th><th>Работник / документ</th><th>Трек-номер</th><th>Статус</th><th>Действия</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <p class="empty" id="empty">Журнал пуст. Добавьте первую запись после отправки письма на Почте.</p>
+  </div>
+
+  <div class="card help">
+    <h2>Как всё связано</h2>
+    <ul class="how">
+      <li><span class="n">1</span><span><b>Трек-номер — единственный ключ.</b> Он печатается в чеке и в списке ф. 103 при отправке. Журнал хранит его, QR кодирует ссылку с ним, личный кабинет ищет по нему.</span></li>
+      <li><span class="n">2</span><span><b>QR не привязан к личному кабинету</b> — и не должен быть. Он ведёт на публичную страницу отслеживания pochta.ru, которую видит любой без пароля. Поэтому QR безопасно клеить в личное дело.</span></li>
+      <li><span class="n">3</span><span><b>Личный кабинет «Отправка для бизнеса» — отдельный контур.</b> Туда в день вручения приходит бланк ЮЗЭУВ. Найти его к записи журнала просто: поиск по тому же трек-номеру. Пароль от кабинета для этого никому передавать не нужно.</span></li>
+      <li><span class="n">4</span><span><b>Автоматизация — только через API-токен.</b> Если захотите, чтобы статусы и бланки подтягивались сами, ИТ-специалист выпускает в кабинете токен для API Почты России. Токен — не пароль: его можно отозвать, и он даёт только те права, что выданы.</span></li>
+    </ul>
+    <div class="axiom">Пароль от корпоративного кабинета не передаётся никому — ни коллегам, ни подрядчикам, ни ИИ-сервисам. Для интеграций существуют токены, их выпускает администратор кабинета.</div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var KEY = 'kedo_zhurnal_v1';
+    var rows = document.getElementById('rows');
+    var tbl = document.getElementById('tbl');
+    var empty = document.getElementById('empty');
+    var stats = document.getElementById('stats');
+    var err = document.getElementById('err');
+    var STATUSES = [['sent', 'Отправлено'], ['done', 'Вручено'], ['back', 'Возврат']];
+
+    function load() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } }
+    function save(list) { localStorage.setItem(KEY, JSON.stringify(list)); }
+    function esc(s) { var d = document.createElement('span'); d.textContent = s; return d.innerHTML; }
+    function today() { var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+
+    function render() {
+      var list = load();
+      rows.innerHTML = '';
+      tbl.style.display = list.length ? '' : 'none';
+      empty.style.display = list.length ? 'none' : '';
+      var done = list.filter(function (r) { return r.status === 'done'; }).length;
+      var back = list.filter(function (r) { return r.status === 'back'; }).length;
+      stats.textContent = list.length ? ('Всего: ' + list.length + ' · вручено: ' + done + ' · возвраты: ' + back) : '';
+      list.forEach(function (r, i) {
+        var tr = document.createElement('tr');
+        var opts = STATUSES.map(function (s) {
+          return '<option value="' + s[0] + '"' + (r.status === s[0] ? ' selected' : '') + '>' + s[1] + '</option>';
+        }).join('');
+        var qrHref = 'qr.html?track=' + encodeURIComponent(r.track) + '&cap=' + encodeURIComponent(r.fio + ' — ' + r.doc);
+        tr.innerHTML =
+          '<td>' + esc(r.dt) + '</td>' +
+          '<td><span class="fio">' + esc(r.fio) + '</span><br><span class="doc">' + esc(r.doc) + (r.note ? ' · ' + esc(r.note) : '') + '</span></td>' +
+          '<td><a class="track" href="https://www.pochta.ru/tracking?barcode=' + encodeURIComponent(r.track) + '" target="_blank" rel="noopener">' + esc(r.track) + '</a></td>' +
+          '<td><select class="status st-' + r.status + '" data-i="' + i + '">' + opts + '</select></td>' +
+          '<td><div class="rowbtns"><a href="' + qrHref + '">QR</a><button type="button" data-del="' + i + '">Удалить</button></div></td>';
+        rows.appendChild(tr);
+      });
+    }
+
+    document.getElementById('dt').value = today();
+
+    document.getElementById('add').addEventListener('click', function () {
+      err.style.display = 'none';
+      var dt = document.getElementById('dt').value;
+      var fio = document.getElementById('fio').value.trim();
+      var doc = document.getElementById('doc').value.trim();
+      var track = document.getElementById('track').value.replace(/\s+/g, '').toUpperCase();
+      var note = document.getElementById('note').value.trim();
+      if (!fio || !doc || !track) { err.textContent = 'Заполните работника, документ и трек-номер.'; err.style.display = 'block'; return; }
+      if (!/^\d{14}$/.test(track) && !/^[A-Z]{2}\d{9}[A-Z]{2}$/.test(track)) { err.textContent = 'Трек-номер выглядит неверно: 14 цифр или формат AA123456789BB.'; err.style.display = 'block'; return; }
+      var list = load();
+      list.unshift({ dt: dt || today(), fio: fio, doc: doc, track: track, note: note, status: 'sent' });
+      save(list); render();
+      document.getElementById('fio').value = ''; document.getElementById('doc').value = '';
+      document.getElementById('track').value = ''; document.getElementById('note').value = '';
+    });
+
+    rows.addEventListener('change', function (e) {
+      var i = e.target.getAttribute('data-i');
+      if (i !== null) { var list = load(); list[i].status = e.target.value; save(list); render(); }
+    });
+    rows.addEventListener('click', function (e) {
+      var i = e.target.getAttribute('data-del');
+      if (i !== null) {
+        var list = load();
+        if (confirm('Удалить запись: ' + list[i].fio + ' — ' + list[i].doc + '?')) { list.splice(i, 1); save(list); render(); }
+      }
+    });
+
+    document.getElementById('csv').addEventListener('click', function () {
+      var list = load();
+      if (!list.length) { return; }
+      var name = { sent: 'Отправлено', done: 'Вручено', back: 'Возврат' };
+      var lines = ['Дата;Работник;Документ;Трек-номер;Статус;Примечание'];
+      list.forEach(function (r) {
+        lines.push([r.dt, r.fio, r.doc, r.track, name[r.status] || r.status, r.note || ''].map(function (v) {
+          return '"' + String(v).replace(/"/g, '""') + '"';
+        }).join(';'));
+      });
+      var blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'zhurnal_otpravlenii.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+
+    document.getElementById('printBtn').addEventListener('click', function () { window.print(); });
+    document.getElementById('clear').addEventListener('click', function () {
+      if (confirm('Удалить ВСЕ записи журнала на этом компьютере? Сначала сделайте экспорт CSV.')) { localStorage.removeItem(KEY); render(); }
+    });
+
+    render();
+  })();
+</script>
+</body>
+</html>
