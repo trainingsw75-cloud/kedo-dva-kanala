@@ -185,10 +185,14 @@
     document.getElementById('make').addEventListener('click', build);
     (function () {
       var p = new URLSearchParams(location.search);
-      var t = p.get('track'), c = p.get('cap');
+      var t = p.get('track'), u = p.get('url'), c = p.get('cap');
+      if (c) { document.getElementById('cap').value = c; }
       if (t) {
         document.getElementById('track').value = t;
-        if (c) { document.getElementById('cap').value = c; }
+        build();
+      } else if (u) {
+        setMode('url');
+        document.getElementById('url').value = u;
         build();
       }
     })();

@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Трек-лист заявки на кадровый документ: этапы выполнения, дата сдачи, сколько рабочих дней осталось. Данные передаются в самой ссылке и не хранятся на сервере.">
+<title>Трек заявки · Кадровые документы</title>
+<style>
+  :root {
+    --bg: #F7F9FB; --surface: #FFFFFF; --ink: #1B2430; --muted: #5A6B80; --line: #D9E1EA;
+    --paper: #1D5FBF; --paper-ink: #16498F; --paper-soft: #EAF1FB;
+    --digital: #0E8A7B; --digital-ink: #0A6B60; --digital-soft: #E7F4F1;
+    --warn: #B45309; --warn-soft: #FBF0E1;
+    --good: #15803D; --good-soft: #E9F6EC;
+    --bad: #B42318; --bad-soft: #FBEAE7;
+    --btn-ink: #FFFFFF;
+    --font-display: Georgia, 'Times New Roman', serif;
+    --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141A22; --surface: #1C242F; --ink: #E8EDF4; --muted: #93A3B8; --line: #33404F;
+      --paper: #7CA9EE; --paper-ink: #A7C6F5; --paper-soft: #21304A;
+      --digital: #45BFAE; --digital-ink: #7DD6C9; --digital-soft: #1B3634;
+      --warn: #E3A04A; --warn-soft: #3A2C18;
+      --good: #4ADE80; --good-soft: #16321F;
+      --bad: #F1706B; --bad-soft: #3D1E1B;
+      --btn-ink: #10151C;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--font-body); margin: 0; font-size: 15px; line-height: 1.55; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 30px 18px 70px; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-family: var(--font-display); font-size: clamp(23px, 4vw, 32px); line-height: 1.18; margin: 8px 0 10px; }
+  .lead { font-size: 14.5px; color: var(--muted); margin: 0 0 8px; max-width: 66ch; }
+  .privacy { display: inline-block; font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; background: var(--digital-soft); color: var(--digital-ink); margin-bottom: 18px; }
+  a.back { display: inline-block; font-size: 13px; color: var(--paper-ink); text-decoration: none; margin-bottom: 14px; }
+  a.back:hover { text-decoration: underline; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .card h2 { font-family: var(--font-display); font-size: 18px; margin: 0 0 12px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid .full { grid-column: 1 / -1; }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 0 0 5px; }
+  label .opt { font-weight: 400; color: var(--muted); }
+  input[type="text"], input[type="date"], select { width: 100%; font-family: var(--font-body); font-size: 14.5px; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+  input:focus-visible, select:focus-visible { outline: 2px solid var(--digital); outline-offset: 1px; }
+  .hint { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .err { font-size: 13px; color: var(--warn); font-weight: 600; margin-top: 8px; display: none; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  button { font-family: var(--font-body); font-size: 14px; font-weight: 700; padding: 10px 16px; border-radius: 8px; border: none; background: var(--paper); color: var(--btn-ink); cursor: pointer; }
+  button.secondary, a.abtn { background: var(--surface); color: var(--ink); border: 1px solid var(--line); font-weight: 600; font-size: 14px; padding: 10px 16px; border-radius: 8px; text-decoration: none; display: inline-block; cursor: pointer; }
+  button:focus-visible, a.abtn:focus-visible { outline: 2px solid var(--digital); outline-offset: 2px; }
+  .linkrow { display: flex; gap: 8px; margin-top: 12px; }
+  .linkrow input { flex: 1; font-size: 12.5px; color: var(--muted); }
+
+  /* Tracker widget */
+  .tracker { border-top: 4px solid var(--digital); }
+  .thead { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: baseline; margin-bottom: 6px; }
+  .thead .who { font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+  .thead .doc { font-size: 14px; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 16px; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 700; padding: 7px 13px; border-radius: 999px; }
+  .chip.state-run { background: var(--paper-soft); color: var(--paper-ink); }
+  .chip.state-done { background: var(--good-soft); color: var(--good); }
+  .chip.state-late { background: var(--bad-soft); color: var(--bad); }
+  .chip.date { background: var(--bg); color: var(--ink); border: 1px solid var(--line); font-weight: 600; }
+  .pbar { height: 10px; border-radius: 999px; background: var(--line); overflow: hidden; margin-bottom: 20px; }
+  .pbar .fill { height: 100%; border-radius: 999px; background: var(--digital); transition: width .3s; }
+  .pbar.late .fill { background: var(--bad); }
+
+  ol.stages { margin: 0; padding: 0; list-style: none; }
+  ol.stages li { position: relative; padding: 0 0 22px 52px; }
+  ol.stages li:last-child { padding-bottom: 0; }
+  ol.stages .dot { position: absolute; left: 0; top: 0; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; background: var(--bg); border: 2px solid var(--line); color: var(--muted); z-index: 1; }
+  ol.stages li::after { content: ''; position: absolute; left: 17px; top: 38px; bottom: 2px; width: 2px; background: var(--line); }
+  ol.stages li:last-child::after { display: none; }
+  ol.stages li.done .dot { background: var(--good-soft); border-color: var(--good); color: var(--good); }
+  ol.stages li.done::after { background: var(--good); }
+  ol.stages li.current .dot { background: var(--paper-soft); border-color: var(--paper); color: var(--paper-ink); box-shadow: 0 0 0 5px color-mix(in srgb, var(--paper) 18%, transparent); }
+  ol.stages .sname { font-size: 15px; font-weight: 700; padding-top: 6px; }
+  ol.stages li.future .sname { color: var(--muted); font-weight: 600; }
+  ol.stages .sdate { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+  ol.stages li.current .sdate { color: var(--paper-ink); font-weight: 600; }
+  .tnote { font-size: 13px; color: var(--muted); border-top: 1px dashed var(--line); margin-top: 16px; padding-top: 12px; }
+  .tactions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .contact { font-size: 12.5px; color: var(--muted); margin-top: 12px; }
+
+  @media (max-width: 700px) {
+    .grid { grid-template-columns: 1fr; }
+    .linkrow { flex-direction: column; }
+  }
+  @media print {
+    a.back, .card.ctor, .privacy, .lead, .tactions, .contact { display: none !important; }
+    body { background: #fff; }
+    .card { border: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">← К проекту «Два канала доставки»</a>
+
+  <div id="ctorHead">
+    <div class="eyebrow">Рабочий инструмент КДП</div>
+    <h1>Трек заявки на документ</h1>
+    <p class="lead">Заполните карточку — получите ссылку для работника. Открыв её, он видит, на каком этапе его документ, дату сдачи и сколько рабочих дней осталось. Как отслеживание посылки, только для заявки в кадры.</p>
+    <span class="privacy">🔒 Данные зашиты в саму ссылку (часть после #) — на сервер не передаются и нигде не хранятся</span>
+  </div>
+  <div id="viewHead" style="display:none">
+    <div class="eyebrow">Отслеживание заявки на кадровый документ</div>
+    <h1>Где мой документ?</h1>
+  </div>
+
+  <div class="card ctor" id="ctor">
+    <h2>Карточка заявки</h2>
+    <form onsubmit="return false;">
+      <div class="grid">
+        <div><label for="who">Заявка / работник</label><input type="text" id="who" autocomplete="off" placeholder="Например: Заявка № 27 или Иванов И.">
+          <p class="hint">Лучше номер заявки или фамилия без лишних данных — ссылку увидит каждый, кому её перешлют.</p></div>
+        <div><label for="doc">Какой документ</label><input type="text" id="doc" autocomplete="off" placeholder="Копия приказа о приёме на работу"></div>
+        <div><label for="dt0">Дата заявки</label><input type="date" id="dt0"></div>
+        <div><label for="dl">Дата сдачи (срок)</label><input type="date" id="dl">
+          <p class="hint">Подставляется +3 рабочих дня (ст. 22.3 ТК РФ). Можно изменить.</p></div>
+        <div><label for="st">Текущий этап</label>
+          <select id="st">
+            <option value="1">1. Заявка принята</option>
+            <option value="2">2. Готовится в КДП</option>
+            <option value="3">3. На подписании</option>
+            <option value="4">4. Отправлен / готов к выдаче</option>
+            <option value="5">5. Вручён работнику</option>
+          </select></div>
+        <div><label for="tr">Трек-номер письма <span class="opt">— если отправлен Почтой</span></label><input type="text" id="tr" autocomplete="off" placeholder="14 цифр"></div>
+        <div class="full"><label for="nt">Примечание для работника <span class="opt">— необязательно</span></label><input type="text" id="nt" autocomplete="off" placeholder="Например: получить в каб. 214 с паспортом"></div>
+      </div>
+      <p class="err" id="err"></p>
+      <div class="actions">
+        <button type="button" id="copy">🔗 Скопировать ссылку для работника</button>
+        <a class="abtn" id="qrlink" href="qr.html">📱 QR этой ссылки</a>
+        <a class="abtn" id="openview" href="trek.html" target="_blank" rel="noopener">👁 Открыть как работник</a>
+      </div>
+      <div class="linkrow"><input type="text" id="linkout" readonly aria-label="Ссылка для работника"></div>
+    </form>
+  </div>
+
+  <div class="card tracker" id="tracker" style="display:none"></div>
+
+  <p class="contact" id="viewFoot" style="display:none">Статус обновляет отдел кадров — при обновлении вам направят новую ссылку. Вопросы — в КДП.</p>
+</div>
+
+<script>
+  (function () {
+    var NAMES = ['Заявка принята', 'Готовится в КДП', 'На подписании', 'Отправлен / готов к выдаче', 'Вручён работнику'];
+
+    function pad(n) { return ('0' + n).slice(-2); }
+    function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+    function parseISO(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+    function fmt(s) { if (!s) return ''; var p = s.split('-'); return p[2] + '.' + p[1] + '.' + p[0]; }
+    function isWork(d) { return d.getDay() !== 0 && d.getDay() !== 6; }
+    function addBiz(s, n) { var d = parseISO(s), add = 0; while (add < n) { d.setDate(d.getDate() + 1); if (isWork(d)) add++; } return iso(d); }
+    function bizBetween(a, b) { var d = parseISO(a), end = parseISO(b), n = 0; while (d < end) { d.setDate(d.getDate() + 1); if (isWork(d)) n++; } return n; }
+
+    function enc(o) { return btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+    function dec(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+
+    function collect() {
+      return {
+        v: 1,
+        n: document.getElementById('who').value.trim(),
+        doc: document.getElementById('doc').value.trim(),
+        dt0: document.getElementById('dt0').value,
+        dl: document.getElementById('dl').value,
+        st: +document.getElementById('st').value,
+        tr: document.getElementById('tr').value.replace(/\s+/g, ''),
+        nt: document.getElementById('nt').value.trim()
+      };
+    }
+
+    function render(o, el, isPreview) {
+      var todayS = iso(new Date());
+      var stateChip, pbarClass = '', pct = Math.round((o.st - 1) / 4 * 100);
+      if (o.st >= 5) {
+        stateChip = '<span class="chip state-done">✅ Выполнено — документ вручён</span>'; pct = 100;
+      } else if (o.dl && todayS > o.dl) {
+        stateChip = '<span class="chip state-late">⏰ Просрочено на ' + bizBetween(o.dl, todayS) + ' раб. дн.</span>'; pbarClass = 'late';
+      } else if (o.dl && todayS === o.dl) {
+        stateChip = '<span class="chip state-run">🔵 В работе — срок сегодня</span>';
+      } else if (o.dl) {
+        stateChip = '<span class="chip state-run">🔵 В работе — осталось ' + bizBetween(todayS, o.dl) + ' раб. дн.</span>';
+      } else {
+        stateChip = '<span class="chip state-run">🔵 В работе</span>';
+      }
+      var chips = '<div class="chips">' + stateChip +
+        (o.dt0 ? '<span class="chip date">📥 Заявка: ' + fmt(o.dt0) + '</span>' : '') +
+        (o.dl ? '<span class="chip date">📅 Срок сдачи: ' + fmt(o.dl) + '</span>' : '') + '</div>';
+      var stages = '<ol class="stages">';
+      for (var i = 1; i <= 5; i++) {
+        var cls = i < o.st ? 'done' : (i === o.st ? (o.st >= 5 ? 'done' : 'current') : 'future');
+        var mark = i < o.st || o.st >= 5 ? '✓' : i;
+        var sub = i === o.st && o.st < 5 ? 'сейчас на этом этапе' : '';
+        if (i === 4 && o.tr && o.st >= 4) { sub = 'заказное письмо № ' + o.tr; }
+        stages += '<li class="' + cls + '"><span class="dot">' + mark + '</span><div class="sname">' + NAMES[i - 1] + '</div>' + (sub ? '<div class="sdate">' + sub + '</div>' : '') + '</li>';
+      }
+      stages += '</ol>';
+      var trackBtn = (o.tr && o.st >= 4 && o.st < 5) ? '<div class="tactions"><a class="abtn" target="_blank" rel="noopener" href="https://www.pochta.ru/tracking?barcode=' + encodeURIComponent(o.tr) + '">📮 Отследить письмо на pochta.ru</a></div>' : '';
+      var note = o.nt ? '<div class="tnote">💬 ' + escapeHtml(o.nt) + '</div>' : '';
+      el.innerHTML =
+        '<div class="thead"><span class="who">' + escapeHtml(o.n || 'Заявка') + '</span><span class="doc">' + escapeHtml(o.doc || '') + '</span></div>' +
+        chips +
+        '<div class="pbar ' + pbarClass + '"><div class="fill" style="width:' + pct + '%"></div></div>' +
+        stages + trackBtn + note +
+        (isPreview ? '' : '<div class="tactions"><button type="button" onclick="window.print()">🖨 Печать</button></div>');
+      el.style.display = 'block';
+    }
+    function escapeHtml(s) { var d = document.createElement('span'); d.textContent = s; return d.innerHTML; }
+
+    var tracker = document.getElementById('tracker');
+    var hash = location.hash;
+
+    if (hash.indexOf('#d=') === 0) {
+      /* ---- viewer mode ---- */
+      document.getElementById('ctor').style.display = 'none';
+      document.getElementById('ctorHead').style.display = 'none';
+      document.getElementById('viewHead').style.display = '';
+      document.getElementById('viewFoot').style.display = '';
+      try {
+        render(dec(hash.slice(3)), tracker, false);
+      } catch (e) {
+        tracker.innerHTML = '<p style="color:var(--warn);font-weight:600">Ссылка повреждена. Запросите новую в отделе кадров.</p>';
+        tracker.style.display = 'block';
+      }
+    } else {
+      /* ---- constructor mode ---- */
+      var dt0 = document.getElementById('dt0');
+      dt0.value = iso(new Date());
+      var dl = document.getElementById('dl');
+      dl.value = addBiz(dt0.value, 3);
+      dt0.addEventListener('change', function () { if (dt0.value) { dl.value = addBiz(dt0.value, 3); update(); } });
+
+      function makeUrl() {
+        var base = location.origin !== 'null' && location.protocol.indexOf('http') === 0
+          ? location.origin + location.pathname
+          : 'https://trainingsw75-cloud.github.io/kedo-dva-kanala/trek.html';
+        return base + '#d=' + enc(collect());
+      }
+      function update() {
+        var o = collect();
+        render(o, tracker, true);
+        var url = makeUrl();
+        document.getElementById('linkout').value = url;
+        document.getElementById('openview').href = url;
+        document.getElementById('qrlink').href = 'qr.html?url=' + encodeURIComponent(url) + (o.n ? '&cap=' + encodeURIComponent(o.n + (o.doc ? ' — ' + o.doc : '')) : '');
+      }
+      ['who', 'doc', 'dl', 'st', 'tr', 'nt'].forEach(function (id) {
+        document.getElementById(id).addEventListener('input', update);
+        document.getElementById(id).addEventListener('change', update);
+      });
+      document.getElementById('copy').addEventListener('click', function () {
+        var err = document.getElementById('err');
+        err.style.display = 'none';
+        var o = collect();
+        if (!o.n || !o.doc) { err.textContent = 'Заполните заявку/работника и документ.'; err.style.display = 'block'; return; }
+        if (o.tr && !/^\d{14}$/.test(o.tr) && !/^[A-Z]{2}\d{9}[A-Z]{2}$/i.test(o.tr)) { err.textContent = 'Трек-номер выглядит неверно: 14 цифр или AA123456789BB.'; err.style.display = 'block'; return; }
+        update();
+        var url = document.getElementById('linkout').value;
+        var done = function () {
+          var b = document.getElementById('copy');
+          b.textContent = '✓ Ссылка скопирована';
+          setTimeout(function () { b.textContent = '🔗 Скопировать ссылку для работника'; }, 1800);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(url).then(done, function () { document.getElementById('linkout').select(); });
+        } else {
+          var inp = document.getElementById('linkout');
+          inp.select(); try { document.execCommand('copy'); done(); } catch (e) {}
+        }
+      });
+      update();
+    }
+  })();
+</script>
+</body>
+</html>
